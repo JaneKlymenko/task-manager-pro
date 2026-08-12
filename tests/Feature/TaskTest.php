@@ -24,17 +24,89 @@ test('dashboard shows only the current user tasks', function () {
         );
 });
 
+test('tasks index shows only the current user tasks', function () {
+    $user = User::factory()->create();
+    $other = User::factory()->create();
+
+    $ownTask = $user->tasks()->create(['title' => 'My task']);
+    $other->tasks()->create(['title' => 'Other task']);
+
+    $this->actingAs($user)
+        ->get(route('tasks.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('tasks/Index')
+            ->has('tasks', 1)
+            ->where('tasks.0.id', $ownTask->id)
+        );
+});
+
+test('user can open create task page', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->get(route('tasks.create'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('tasks/Create'));
+});
+
 test('user can create a task', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
         ->post(route('tasks.store'), ['title' => 'New task'])
-        ->assertRedirect();
+        ->assertRedirect(route('tasks.index'));
 
     $this->assertDatabaseHas('tasks', [
         'user_id' => $user->id,
         'title' => 'New task',
         'is_done' => false,
+    ]);
+});
+
+test('user can create a task with full details', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('tasks.store'), [
+            'title' => 'Full task',
+            'description' => 'Detailed notes',
+            'status' => 'in_progress',
+            'priority' => 2,
+            'due_date' => '2030-01-15',
+            'time_estimate' => 45,
+        ])
+        ->assertRedirect(route('tasks.index'));
+
+    $this->assertDatabaseHas('tasks', [
+        'user_id' => $user->id,
+        'title' => 'Full task',
+        'description' => 'Detailed notes',
+        'status' => 'in_progress',
+        'priority' => 2,
+        'time_estimate' => 45,
+        'is_done' => false,
+    ]);
+
+    $task = $user->tasks()->where('title', 'Full task')->first();
+    expect($task->due_date->toDateString())->toBe('2030-01-15');
+});
+
+test('creating a done task marks is_done true', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('tasks.store'), [
+            'title' => 'Already done',
+            'status' => 'done',
+        ])
+        ->assertRedirect(route('tasks.index'));
+
+    $this->assertDatabaseHas('tasks', [
+        'user_id' => $user->id,
+        'title' => 'Already done',
+        'status' => 'done',
+        'is_done' => true,
     ]);
 });
 

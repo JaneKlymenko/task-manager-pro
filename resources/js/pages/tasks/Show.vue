@@ -54,6 +54,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                         <dd>{{ task.due_date || '—' }}</dd>
                     </div>
                     <div>
+                        <dt class="text-sm text-muted-foreground">Time estimate</dt>
+                        <dd>{{ task.time_estimate ? `${task.time_estimate} min` : '—' }}</dd>
+                    </div>
+                    <div>
                         <dt class="text-sm text-muted-foreground">Created</dt>
                         <dd>{{ task.created_at ? new Date(task.created_at).toLocaleString() : '—' }}</dd>
                     </div>

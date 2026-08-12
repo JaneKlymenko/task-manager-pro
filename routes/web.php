@@ -9,11 +9,13 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', [TaskController::class, 'index'])->name('dashboard');
+    Route::get('dashboard', [TaskController::class, 'dashboard'])->name('dashboard');
 
+    Route::get('tasks', [TaskController::class, 'index'])->name('tasks.index');
+    Route::get('tasks/create', [TaskController::class, 'create'])->name('tasks.create');
     Route::post('tasks', [TaskController::class, 'store'])->name('tasks.store');
-    Route::patch('tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
     Route::get('tasks/{task}', [TaskController::class, 'show'])->name('tasks.show');
+    Route::patch('tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
     Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
 });
 
