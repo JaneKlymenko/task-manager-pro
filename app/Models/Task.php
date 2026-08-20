@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,6 +26,7 @@ class Task extends Model
     {
         return [
             'is_done' => 'boolean',
+            'status' => TaskStatus::class,
             'due_date' => 'date',
             'priority' => 'integer',
             'time_estimate' => 'integer',

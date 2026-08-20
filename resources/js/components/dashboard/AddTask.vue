@@ -3,7 +3,10 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useTaskStatuses } from '@/composables/useTaskStatuses';
 import { Form } from '@inertiajs/vue3';
+
+const { statuses } = useTaskStatuses();
 
 const fieldClass =
     'border-input bg-background text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 dark:bg-input/30 dark:[color-scheme:dark] flex w-full rounded-md border px-3 text-sm shadow-xs outline-none focus-visible:ring-[3px]';
@@ -39,10 +42,10 @@ const fieldClass =
 
             <div class="space-y-2">
                 <Label for="status">Status</Label>
-                <select id="status" name="status" :class="[fieldClass, 'h-9']">
-                    <option value="pending">Pending</option>
-                    <option value="in_progress">In progress</option>
-                    <option value="done">Done</option>
+                <select id="status" name="status" :class="[fieldClass, 'h-9']" required>
+                    <option v-for="status in statuses" :key="status.value" :value="status.value">
+                        {{ status.label }}
+                    </option>
                 </select>
                 <InputError :message="errors.status" />
             </div>

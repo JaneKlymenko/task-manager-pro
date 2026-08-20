@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
+import { useTaskStatuses } from '@/composables/useTaskStatuses';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem, type Task } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
 
 const props = defineProps<{
     task: Task;
 }>();
+
+const { statusLabel } = useTaskStatuses();
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -25,7 +28,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                     <p class="text-sm text-muted-foreground">
                         Status:
                         <span :class="task.is_done ? 'text-green-600' : 'text-amber-600'">
-                            {{ task.is_done ? 'Done' : 'Open' }}
+                            {{ statusLabel(task.status) }}
                         </span>
                     </p>
                 </div>
@@ -47,7 +50,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </div>
                     <div>
                         <dt class="text-sm text-muted-foreground">Status</dt>
-                        <dd>{{ task.status ?? 'pending' }}</dd>
+                        <dd>{{ statusLabel(task.status) }}</dd>
                     </div>
                     <div>
                         <dt class="text-sm text-muted-foreground">Due date</dt>

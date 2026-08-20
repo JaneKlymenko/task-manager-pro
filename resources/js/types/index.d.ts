@@ -23,6 +23,8 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
     auth: Auth;
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
+    locale: string;
+    taskStatuses: { value: string; label: string }[];
 };
 
 export interface User {
@@ -35,11 +37,13 @@ export interface User {
     updated_at: string;
 }
 
+export type TaskStatus = 'new' | 'in_progress' | 'pending' | 'completed' | 'cancelled';
+
 export interface Task {
     id: number;
     title: string;
     is_done: boolean;
-    status?: string;
+    status?: TaskStatus | string;
     priority?: number;
     due_date?: string | null;
     description?: string | null;

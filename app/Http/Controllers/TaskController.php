@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TaskStatus;
 use App\Models\Task;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -34,13 +36,17 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
-            'status' => ['nullable', 'string', 'in:pending,in_progress,done'],
+            'status' => ['nullable', Rule::enum(TaskStatus::class)],
             'priority' => ['nullable', 'integer', 'min:0', 'max:3'],
             'due_date' => ['nullable', 'date'],
             'time_estimate' => ['nullable', 'integer', 'min:1'],
         ]);
 
-        $validated['is_done'] = ($validated['status'] ?? null) === 'done';
+        $status = TaskStatus::tryFrom($validated['status'] ?? TaskStatus::PENDING->value)
+            ?? TaskStatus::PENDING;
+
+        $validated['status'] = $status;
+        $validated['is_done'] = $status === TaskStatus::COMPLETED;
 
         $request->user()->tasks()->create($validated);
 
@@ -64,6 +70,12 @@ class TaskController extends Controller
             'is_done' => ['required', 'boolean'],
         ]);
 
+        if ($validated['is_done']) {
+            $validated['status'] = TaskStatus::COMPLETED;
+        } elseif ($task->status === TaskStatus::COMPLETED) {
+            $validated['status'] = TaskStatus::IN_PROGRESS;
+        }
+
         $task->update($validated);
 
         return back();
@@ -83,6 +95,6 @@ class TaskController extends Controller
         return $request->user()
             ->tasks()
             ->latest()
-            ->get(['id', 'title', 'is_done', 'created_at', 'status', 'priority', 'due_date']);
+            ->get(['id', 'title', 'is_done', 'created_at', 'status', 'priority', 'due_date', 'time_estimate']);
     }
 }

@@ -92,20 +92,20 @@ test('user can create a task with full details', function () {
     expect($task->due_date->toDateString())->toBe('2030-01-15');
 });
 
-test('creating a done task marks is_done true', function () {
+test('creating a completed task marks is_done true', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
         ->post(route('tasks.store'), [
             'title' => 'Already done',
-            'status' => 'done',
+            'status' => 'completed',
         ])
         ->assertRedirect(route('tasks.index'));
 
     $this->assertDatabaseHas('tasks', [
         'user_id' => $user->id,
         'title' => 'Already done',
-        'status' => 'done',
+        'status' => 'completed',
         'is_done' => true,
     ]);
 });
